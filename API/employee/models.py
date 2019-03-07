@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 class employee(models.Model):
     name=models.CharField(max_length=50)
     location=models.CharField(max_length=50)
-
+    a=10
     def __str__(self):
         return self.name
 
