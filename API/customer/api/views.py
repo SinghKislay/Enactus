@@ -10,12 +10,14 @@ from .serializers import (
     UserCreateSerializer,
     UserLoginSerializer,
     DataCatcherSerializer,
-    DataUpdateSerializer
+    DataUpdateSerializer,
+    ServiceSerializer,
+    EmployeeSerializer,
 )
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-from customer.models import Customer
+from customer.models import Customer,Service,Employee
 from rest_framework import viewsets
 # Create your views here.
 User=get_user_model()
@@ -46,7 +48,7 @@ class DataManView(APIView):
     serializer_class=DataCatcherSerializer
     
     def get(self,request,*args,**kwargs):
-        Customer1=Customer.objects.all()
+        Customer1=Customer.objects.filter(name=request.data['query'])
         serializer=DataCatcherSerializer(Customer1,many=True)
         return Response(serializer.data)
     
@@ -73,3 +75,42 @@ class DataUpdateView(APIView):
             serializer.create(new_data)
             return Response(new_data, status=HTTP_200_OK)    
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+class ServiceView(APIView):
+    authentication_classes=(TokenAuthentication,)
+    permission_classes=(IsAuthenticated,)
+    serializer_class=ServiceSerializer
+
+    def post(self,request,*args,**kwargs):
+        data=request.data
+        serializer=ServiceSerializer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            new_data=serializer.data
+            serializer.create(new_data)
+            return Response(new_data, status=HTTP_200_OK)    
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+    def get(self,request,*args,**kwargs):
+        service_obj=Service.objects.filter(required=0)
+        serializer=ServiceSerializer(service_obj,many=True)
+        return Response(serializer.data)
+
+class EmployeeView(APIView):
+    authentication_classes=(TokenAuthentication,)
+    permission_classes=(IsAuthenticated,)
+    serializer_class=EmployeeSerializer
+    
+    def get(self,request,*args,**kwargs):
+        emp_obj=Employee.objects.filter(working=1)
+        serializer=EmployeeSerializer(emp_obj,many=True)
+        return Response(serializer.data)
+    
+    def post(self,request,*args,**kwargs):
+        data=request.data
+        serializer=EmployeeSerializer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            new_data=serializer.data
+            serializer.create(new_data)
+            return Response(new_data, status=HTTP_200_OK)    
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+    

@@ -10,7 +10,7 @@ from rest_framework.serializers import(
     ValidationError
 )
 from rest_framework.authtoken.models import Token
-from customer.models import Customer
+from customer.models import Customer,Service,Employee
 User = get_user_model()
 
 class UserCreateSerializer(ModelSerializer):
@@ -37,6 +37,10 @@ class UserCreateSerializer(ModelSerializer):
             username=username,
             email=email,
         )
+        customer_obj=Customer(username=username)
+        customer_obj.save()
+        service_obj=Service(username=username)
+        service_obj.save()
         user_obj.set_password(password)
         user_obj.save()
         return validated_data
@@ -104,13 +108,13 @@ class DataCatcherSerializer(ModelSerializer):
     location=CharField(required=True)
     class Meta:
         model=Customer
-        fields=('name','location')
+        fields=('username','location')
 
     def create(self,validated_data):
-        name=validated_data['name']
+        name=validated_data['username']
         location=validated_data['location']
         customer_obj=Customer(
-            name=name,location=location
+            username=name,location=location
         )
         customer_obj.save()
         return validated_data
@@ -126,20 +130,73 @@ class DataUpdateSerializer(ModelSerializer):
     name=CharField(required=True)
     class Meta:
         model=Customer
-        fileds='__all__'
+        fileds=fields=[
+            'username',
+            'name',
+            'location',
+            'starting_time',
+        ]
     
     def create(self,validated_data):
+        print('ram1')
+        username=validated_data['username']
         name=validated_data['name']
         location=validated_data['location']
         st=int(validated_data['starting_time'])
-        customer_obj=Customer.objects.filter(name)
-        customer_obj.objects.update_or_create(name=name,location=location,starting_time=st)
-        customer_obj.save()
+        customer_obj=Customer.objects.filter(username=username)
+        customer_obj.update(name=name,location=location,starting_time=st)
+        
+        
         return validated_data
 
     def validate(self,data):
-        name=data['name']
-        name_qs=Customer.objects.filter(name=name)
-        if name_qs.exists():
+        name=data['username']
+        name_qs=User.objects.filter(username=name)
+        if not name_qs.exists():
             raise ValidationError("This user doesn't exists in the DB")
         return data
+
+class ServiceSerializer(ModelSerializer):
+    class Meta:
+        model=Service
+        fileds=fields='__all__'
+    
+    def validate(self,data):
+        name=data['username']
+        name_qs=User.objects.filter(username=name)
+        if not name_qs.exists():
+            raise ValidationError("This user doesn't exists in the DB")
+        return data
+
+    def create(self,validated_data):
+        username=validated_data['username']
+        date=validated_data['date']
+        timeslot=validated_data['timeslot']
+        worktime=validated_data['worktime']
+        service_obj=Service.objects.filter(username=username)
+        service_obj.update(date=date,timeslot=timeslot,worktime=worktime)
+        return validated_data
+
+class EmployeeSerializer(ModelSerializer):
+    class Meta:
+        model=Employee
+        fileds=fields=['username','working']
+
+    def validate(self,data):
+        name=data['username']
+        name_qs=Employee.objects.filter(username=name)
+        if not name_qs.exists():
+            raise ValidationError("This user doesn't exists in the DB")
+        return data
+
+    def create(self,validated_data):
+        username=validated_data['username']
+        working=validated_data['working']
+        service_obj=Employee.objects.filter(username=username)
+        service_obj.update(working=working)
+        return validated_data
+
+
+
+    
+
