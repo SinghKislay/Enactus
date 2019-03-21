@@ -91,8 +91,14 @@ class ServiceView(APIView):
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     def get(self,request,*args,**kwargs):
-        service_obj=Service.objects.filter(required=0)
+        data=request.data
+        print(data['date'])
+        service_obj=Employee.objects.filter(working=1).filter(date=str(data['date']))
         serializer=ServiceSerializer(service_obj,many=True)
+        
+        
+            
+        
         return Response(serializer.data)
 
 class EmployeeView(APIView):
@@ -106,6 +112,7 @@ class EmployeeView(APIView):
         return Response(serializer.data)
     
     def post(self,request,*args,**kwargs):
+        
         data=request.data
         serializer=EmployeeSerializer(data=data)
         if serializer.is_valid(raise_exception=True):

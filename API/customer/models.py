@@ -30,6 +30,8 @@ class Employee(models.Model):
     name=models.CharField(max_length=50)
     location=models.CharField(max_length=50)
     working=models.IntegerField(default=1)
+    date=models.CharField(max_length=50,default='')
+    timeslot=models.CharField(max_length=50,default='')
     a=10
     def __str__(self):
         return self.username
