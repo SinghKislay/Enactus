@@ -23,12 +23,12 @@ class UserCreateSerializer(ModelSerializer):
             'email',
             'email2',
             'password',
-               
+
         ]
         extra_kwargs={'password':
                {'write_only':True}
                }
-    
+
     def create(self,validated_data):
         username=validated_data['username']
         email=validated_data['email']
@@ -76,11 +76,11 @@ class UserLoginSerializer(ModelSerializer):
             'password',
             'token'
         ]
-        
+
         extra_kwargs={'password':
                {'write_only':True}
                }
-    
+
     def validate(self,data):
         email =data.get("email",None)
         username=data.get("username",None)
@@ -108,7 +108,7 @@ class DataCatcherSerializer(ModelSerializer):
     location=CharField(required=True)
     class Meta:
         model=Customer
-        fields=('username','location')
+        fields=('__all__')
 
     def create(self,validated_data):
         name=validated_data['username']
@@ -120,12 +120,14 @@ class DataCatcherSerializer(ModelSerializer):
         return validated_data
 
     def validate(self,data):
-        name=data['name']
-        name_qs=Customer.objects.filter(name=name)
+        uname=data['username']
+        name_qs=Customer.objects.filter(username=uname)
+
+        if(name_qs.exists()):
+            return data
+        else:
+            raise ValidationError("This user Doesn't Alreay exists")
         
-        if name_qs.exists():
-            raise ValidationError("This user Alreay exists")
-        return data
 class DataUpdateSerializer(ModelSerializer):
     name=CharField(required=True)
     class Meta:
@@ -136,7 +138,7 @@ class DataUpdateSerializer(ModelSerializer):
             'location',
             'starting_time',
         ]
-    
+
     def create(self,validated_data):
         print('ram1')
         username=validated_data['username']
@@ -145,8 +147,8 @@ class DataUpdateSerializer(ModelSerializer):
         st=int(validated_data['starting_time'])
         customer_obj=Customer.objects.filter(username=username)
         customer_obj.update(name=name,location=location,starting_time=st)
-        
-        
+
+
         return validated_data
 
     def validate(self,data):
@@ -160,7 +162,7 @@ class ServiceSerializer(ModelSerializer):
     class Meta:
         model=Service
         fileds=fields='__all__'
-    
+
     def validate(self,data):
         name=data['username']
         name_qs=User.objects.filter(username=name)
@@ -195,8 +197,4 @@ class EmployeeSerializer(ModelSerializer):
         service_obj=Employee.objects.filter(username=username)
         service_obj.update(working=working)
         return validated_data
-
-
-
-    
 

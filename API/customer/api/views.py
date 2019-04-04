@@ -48,7 +48,7 @@ class DataManView(APIView):
     serializer_class=DataCatcherSerializer
     
     def get(self,request,*args,**kwargs):
-        Customer1=Customer.objects.filter(name=request.data['query'])
+        Customer1=Customer.objects.filter(username=request.data['query'])
         serializer=DataCatcherSerializer(Customer1,many=True)
         return Response(serializer.data)
     

@@ -15,5 +15,5 @@ urlpatterns=[
     path('data/',DataManView.as_view(),name="data_fetch"),
     path('update_data/',DataUpdateView.as_view(),name="update_data"),
     path('service_request/',ServiceView.as_view(),name='service'),
-     path('employee_request/',EmployeeView.as_view(),name='employee'),
+    path('employee_request/',EmployeeView.as_view(),name='employee'),
 ]
